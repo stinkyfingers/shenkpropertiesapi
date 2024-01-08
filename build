@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# vars
+new=$1
+dir=$(echo $path | cut -d'/' -f1);
+suffix='lambda'
+prefix='badlibs'
+
+declare -a lambdas
+lambdas=(
+  'lambda'
+)
+
+
+
+build() {
+	path=$1/main.go
+	# build
+	GOOS=linux go build -o $1-$suffix $path
+	zip -j $1.zip $1-$suffix
+	chmod 777 $1.zip
+}
+
+for i in "${lambdas[@]}"
+do
+	echo "lambda: " $i
+	build $i
+done;
