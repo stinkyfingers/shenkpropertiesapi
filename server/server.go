@@ -10,6 +10,10 @@ import (
 type Server struct {
 }
 
+type Response struct {
+	Message string `json:"message"`
+}
+
 func NewServer(profile string) (*Server, error) {
 	return &Server{}, nil
 }
@@ -46,22 +50,22 @@ func cors(handler http.HandlerFunc) http.Handler {
 		if r.Method == "OPTIONS" {
 			return
 		}
-		next := http.HandlerFunc(handler)
-		next.ServeHTTP(w, r)
+		handler.ServeHTTP(w, r)
 	})
 }
 
 func status(w http.ResponseWriter, r *http.Request) {
-	status := struct {
+	resp := struct {
 		Health string `json:"health"`
 	}{
 		"healthy",
 	}
-	j, err := json.Marshal(status)
+	j, err := json.Marshal(resp)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorResponse(w, err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(j)
 }
 
@@ -69,13 +73,33 @@ func sendEmail(w http.ResponseWriter, r *http.Request) {
 	var app email.Application
 	err := json.NewDecoder(r.Body).Decode(&app)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorResponse(w, err)
 		return
 	}
 	err = email.SendEmail(app)
 	if err != nil {
+		errorResponse(w, err)
+		return
+	}
+	j, err := json.Marshal(Response{Message: "Email Sent"})
+	if err != nil {
+		errorResponse(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
+}
+
+func errorResponse(w http.ResponseWriter, err error) {
+	errStruct := struct {
+		Error string `json:"error"`
+	}{
+		err.Error(),
+	}
+	j, err := json.Marshal(errStruct)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte("Email Sent"))
+	http.Error(w, string(j), http.StatusInternalServerError)
 }

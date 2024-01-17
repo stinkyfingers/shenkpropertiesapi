@@ -27,21 +27,26 @@ type Application struct {
 }
 
 type PreviousLandlord struct {
-	Name             string `json:"name"`
-	Phone            string `json:"phone"`
+	LandlordName     string `json:"landlordName"`
+	PhoneNumber      string `json:"phoneNumber"`
 	Email            string `json:"email"`
-	Address          string `json:"address"`
+	RentalAddress    string `json:"rentalAddress"`
 	ReasonForLeaving string `json:"reasonForLeaving"`
-	RentPaid         string `json:"rentPaid"`
-	Dates            string `json:"dates"`
+	MonthlyRent      string `json:"monthlyRent"`
+	OccupancyStart   string `json:"occupancyStart"`
+	OccupancyEnd     string `json:"occupancyEnd"`
 	OkToContact      string `json:"okToContact"`
 }
 
 type Employer struct {
-	Name              string `json:"name"`
-	Phone             string `json:"phone"`
-	Email             string `json:"email"`
-	DatesOfEmployment string `json:"datesOfEmployment"`
+	Name           string `json:"name"`
+	Address        string `json:"address"`
+	PhoneNumber    string `json:"phoneNumber"`
+	Email          string `json:"email"`
+	Position       string `json:"position"`
+	SupervisorName string `json:"supervisorName"`
+	StartDate      string `json:"startDate"`
+	EndDate        string `json:"endDate"`
 }
 
 var tmpl = `
@@ -58,20 +63,25 @@ Email: {{.Email}}
 Gross Monthly Income: {{.GrossMonthlyIncome}}
 Previous Landlords:
 {{range .PreviousLandlords}}
-	Name: {{.Name}}
-	Phone: {{.Phone}}
+	LandlordName: {{.LandlordName}}
+	Phone: {{.PhoneNumber}}
 	Email: {{.Email}}
-	Address: {{.Address}}
+	Rental Address: {{.RentalAddress}}
 	Reason For Leaving: {{.ReasonForLeaving}}
 	Rent Paid: {{.RentPaid}}
-	Dates: {{.Dates}}
+	Occupancy Start: {{.OccupancyStart}}
+	Occupancy End: {{.OccupancyEnd}}
 	Ok To Contact: {{.OkToContact}}
 {{end}}
 Employer:
 	Name: {{.Employer.Name}}
-	Phone: {{.Employer.Phone}}
+	Address: {{.Employer.Address}}
+	Phone Number: {{.Employer.PhoneNumber}}
 	Email: {{.Employer.Email}}
-	Dates Of Employment: {{.Employer.DatesOfEmployment}}
+	Position: {{.Employer.Position}}	
+	Supervisor Name: {{.Employer.SupervisorName}}
+	Start Date: {{.Employer.StartDate}}
+	End Date: {{.Employer.EndDate}}
 Notes: {{.Notes}}
 `
 
