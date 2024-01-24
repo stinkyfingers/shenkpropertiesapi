@@ -217,6 +217,12 @@ data "aws_iam_policy_document" "allow_lambda_s3" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "example" {
+  bucket = aws_s3_bucket.shenkpropertiesapi.id
+  block_public_acls   = false
+  block_public_policy = false
+}
+
 data "aws_ssm_parameter" "gmail_email" {
   name            = var.gmail_email
   with_decryption = false

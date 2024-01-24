@@ -2,12 +2,15 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/stinkyfingers/shenkpropertiesapi/email"
+	"github.com/stinkyfingers/shenkpropertiesapi/storage"
 )
 
 type Server struct {
+	Storage storage.Storage
 }
 
 type Response struct {
@@ -15,13 +18,21 @@ type Response struct {
 }
 
 func NewServer(profile string) (*Server, error) {
-	return &Server{}, nil
+	store, err := storage.NewS3(profile)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Server{
+		Storage: store,
+	}, nil
 }
 
 // NewMux returns the router
 func NewMux(s *Server) (http.Handler, error) {
 	mux := http.NewServeMux()
 	mux.Handle("/sendEmail", cors(sendEmail))
+	mux.Handle("/images", cors(s.getImages))
 	mux.Handle("/test", cors(status))
 	return mux, nil
 }
@@ -82,6 +93,34 @@ func sendEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	j, err := json.Marshal(Response{Message: "Email Sent"})
+	if err != nil {
+		errorResponse(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
+}
+
+func (s *Server) getImages(w http.ResponseWriter, r *http.Request) {
+	property := r.URL.Query().Get("property")
+	if property == "" {
+		errorResponse(w, fmt.Errorf("property is required"))
+		return
+	}
+	keys, err := s.Storage.List(storage.IMAGE_BUCKET, property)
+	if err != nil {
+		errorResponse(w, err)
+		return
+	}
+	for i, key := range keys {
+		keys[i] = fmt.Sprintf("https://%s.s3.amazonaws.com/%s", storage.IMAGE_BUCKET, key)
+	}
+	Photos := struct {
+		Keys []string `json:"keys"`
+	}{
+		keys,
+	}
+	j, err := json.Marshal(Photos)
 	if err != nil {
 		errorResponse(w, err)
 		return
