@@ -201,6 +201,11 @@ resource "aws_s3_bucket_policy" "shenkpropertiesapi_s3" {
   policy = data.aws_iam_policy_document.allow_lambda_s3.json
 }
 
+resource "aws_s3_bucket_policy" "shenkpropertiesapi_s3_public" {
+  bucket = "shenkpropertiesapi"
+  policy = data.aws_iam_policy_document.public_access.json
+}
+
 data "aws_iam_policy_document" "allow_lambda_s3" {
   statement {
     principals {
@@ -212,6 +217,21 @@ data "aws_iam_policy_document" "allow_lambda_s3" {
     ]
     resources = [
       "arn:aws:s3:::shenkpropertiesapi",
+      "arn:aws:s3:::shenkpropertiesapi/*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "public_access"{
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+    actions = [
+      "s3:GetObject"
+    ]
+    resources = [
       "arn:aws:s3:::shenkpropertiesapi/*"
     ]
   }
