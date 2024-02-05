@@ -35,7 +35,7 @@ type PreviousLandlord struct {
 	RentPaid         string `json:"rentPaid"`
 	OccupancyStart   string `json:"occupancyStart"`
 	OccupancyEnd     string `json:"occupancyEnd"`
-	OkToContact      string `json:"okToContact"`
+	OkToContact      bool   `json:"okToContact"`
 }
 
 type Employer struct {
