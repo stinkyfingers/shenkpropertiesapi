@@ -32,7 +32,7 @@ type PreviousLandlord struct {
 	Email            string `json:"email"`
 	RentalAddress    string `json:"rentalAddress"`
 	ReasonForLeaving string `json:"reasonForLeaving"`
-	MonthlyRent      string `json:"monthlyRent"`
+	RentPaid         string `json:"rentPaid"`
 	OccupancyStart   string `json:"occupancyStart"`
 	OccupancyEnd     string `json:"occupancyEnd"`
 	OkToContact      string `json:"okToContact"`
