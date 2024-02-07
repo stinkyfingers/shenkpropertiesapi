@@ -103,10 +103,6 @@ func sendEmail(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getImages(w http.ResponseWriter, r *http.Request) {
 	property := r.URL.Query().Get("property")
-	if property == "" {
-		errorResponse(w, fmt.Errorf("property is required"))
-		return
-	}
 	keys, err := s.Storage.List(storage.IMAGE_BUCKET, property)
 	if err != nil {
 		errorResponse(w, err)
