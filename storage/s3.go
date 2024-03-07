@@ -15,7 +15,7 @@ type S3 struct {
 }
 
 const (
-	IMAGE_BUCKET = "shenkpropertiesapi"
+	DATA_BUCKET = "shenkpropertiesapi"
 )
 
 func NewS3(profile string) (*S3, error) {

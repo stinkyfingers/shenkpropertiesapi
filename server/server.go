@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -31,6 +32,7 @@ func NewServer(profile string) (*Server, error) {
 // NewMux returns the router
 func NewMux(s *Server) (http.Handler, error) {
 	mux := http.NewServeMux()
+	mux.Handle("/data", cors(s.data))
 	mux.Handle("/sendEmail", cors(sendEmail))
 	mux.Handle("/images", cors(s.getImages))
 	mux.Handle("/test", cors(status))
@@ -80,6 +82,22 @@ func status(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+func (s *Server) data(w http.ResponseWriter, r *http.Request) {
+	data, err := s.Storage.Get(storage.DATA_BUCKET, "shenkproperties.json")
+	if err != nil {
+		errorResponse(w, err)
+		return
+	}
+	var b bytes.Buffer
+	_, err = b.ReadFrom(data)
+	if err != nil {
+		errorResponse(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(b.Bytes())
+}
+
 func sendEmail(w http.ResponseWriter, r *http.Request) {
 	var app email.Application
 	err := json.NewDecoder(r.Body).Decode(&app)
@@ -103,13 +121,13 @@ func sendEmail(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getImages(w http.ResponseWriter, r *http.Request) {
 	property := r.URL.Query().Get("property")
-	keys, err := s.Storage.List(storage.IMAGE_BUCKET, property)
+	keys, err := s.Storage.List(storage.DATA_BUCKET, property)
 	if err != nil {
 		errorResponse(w, err)
 		return
 	}
 	for i, key := range keys {
-		keys[i] = fmt.Sprintf("https://%s.s3.amazonaws.com/%s", storage.IMAGE_BUCKET, key)
+		keys[i] = fmt.Sprintf("https://%s.s3.amazonaws.com/%s", storage.DATA_BUCKET, key)
 	}
 	Photos := struct {
 		Keys []string `json:"keys"`
