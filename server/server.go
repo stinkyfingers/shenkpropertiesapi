@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"github.com/stinkyfingers/shenkpropertiesapi/email"
 	"github.com/stinkyfingers/shenkpropertiesapi/storage"
@@ -35,6 +37,7 @@ func NewMux(s *Server) (http.Handler, error) {
 	mux.Handle("/data", cors(s.data))
 	mux.Handle("/sendEmail", cors(sendEmail))
 	mux.Handle("/images", cors(s.getImages))
+	mux.Handle("/file", cors(s.getFile))
 	mux.Handle("/test", cors(status))
 	return mux, nil
 }
@@ -141,6 +144,24 @@ func (s *Server) getImages(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(j)
+}
+
+func (s *Server) getFile(w http.ResponseWriter, r *http.Request) {
+	key := r.URL.Query().Get("key")
+	suffix := strings.TrimPrefix(filepath.Ext(key), ".")
+	data, err := s.Storage.Get(storage.DATA_BUCKET, key)
+	if err != nil {
+		errorResponse(w, err)
+		return
+	}
+	var b bytes.Buffer
+	_, err = b.ReadFrom(data)
+	if err != nil {
+		errorResponse(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", fmt.Sprintf("application/%s", suffix))
+	w.Write(b.Bytes())
 }
 
 func errorResponse(w http.ResponseWriter, err error) {
