@@ -21,6 +21,8 @@ type Application struct {
 	PhoneNumber        string             `json:"phoneNumber"`
 	Email              string             `json:"email"`
 	GrossMonthlyIncome string             `json:"grossMonthlyIncome"`
+	Evicted            bool               `json:"evicted"`
+	Felony             bool               `json:"felony"`
 	PreviousLandlords  []PreviousLandlord `json:"previousLandlord"`
 	Employer           Employer           `json:"employer"`
 	Notes              string             `json:"notes"`
@@ -61,6 +63,8 @@ Zip: {{.Zip}}
 Phone Number: {{.PhoneNumber}}
 Email: {{.Email}}
 Gross Monthly Income: {{.GrossMonthlyIncome}}
+Evicted: {{.Evicted}}
+Felony: {{.Felony}}
 Previous Landlords:
 {{range .PreviousLandlords}}
 	LandlordName: {{.LandlordName}}
